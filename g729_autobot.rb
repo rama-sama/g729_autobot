@@ -6,8 +6,6 @@ require 'fileutils'
 
 logger = Logger.new(STDOUT)
 
-
-
 # Parse config file for configuration options
 config = File.readlines('config')
 config_opts_and_values = {}
@@ -17,8 +15,7 @@ config.each do |line|
   config_opts_and_values[key] = value
 end
 
-
-
+# Parse command line options
 @opts = {source:nil, dest:nil, file:nil}
 OptionParser.new do |opts|
   opts.banner = 'Usage: ./g729_autobot.rb -f <pcap path> -s <source udp port> -d <dest udp port>'
@@ -39,8 +36,6 @@ def filter(direction)
   end
 end
 
-
-
 # Set up file names and paths
 pcap_path = File.absolute_path(@opts[:file])
 pcap_name = File.basename(@opts[:file], ".*")
@@ -55,14 +50,10 @@ audio_dir = "#{anchor_dir}/audio_files"
 pcap_forward = "#{pcap_dir}/#{pcap_name}_#{@opts[:source]}_#{@opts[:dest]}_forward"
 pcap_reverse = "#{pcap_dir}/#{pcap_name}_#{@opts[:source]}_#{@opts[:dest]}_reverse"
 
-
-
 # Parse pcap for RTP streams
 logger.info("Parsing #{pcap_name} for RTP streams")
 system("tshark -r '#{pcap_path}' -Y '#{filter('forward')}' -w '#{pcap_forward}'")
 system("tshark -r '#{pcap_path}' -Y '#{filter('reverse')}' -w '#{pcap_reverse}'")
-
-
 
 # Run external scripts to convert RTP to a .au file
 [pcap_forward, pcap_reverse].each do |pcap|
